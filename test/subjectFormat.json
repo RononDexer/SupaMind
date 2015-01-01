@@ -1,0 +1,191 @@
+{
+    "title": "Sequence",
+    "type": "root",
+    "image_id": "root",
+    "html": "",
+    "color": "rgba(200, 10, 10, 0.2)",
+    "children": [
+        {
+            "title": "Format",
+            "type": "text",
+            "html": "Format",
+            "color": "rgba(255, 128, 40, 0.5)",
+            "children": [
+                {
+                    "title": "Alphabet",
+                    "children": [
+                        {
+                            "title": "Proteic"
+                        },
+                        {
+                            "title": "Nucleic",
+                            "children": [
+                                {
+                                    "title": "Unambiguous",
+                                    "html": "<p> ATCG </p>"
+                                },
+                                {
+                                    "title": "Ambiguous"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Examples",
+                    "children": [
+                        {
+                            "title": "FASTA"
+                        },
+                        {
+                            "title": "Uniprot/EMBL"
+                        },
+                        {
+                            "title": "PDB"
+                        }
+                    ]
+                },
+                {
+                    "title": "Flat file"
+                }
+            ]
+        },
+        {
+            "title": "Molecule",
+            "type": "text",
+            "html": "Molecule",
+            "color": "rgba(0, 255, 0, 0.5)",
+            "children": [
+                {
+                    "title": "Nucleic Acid",
+                    "children": [
+                        {
+                            "title": "DNA"
+                        },
+                        {
+                            "title": "mRNA"
+                        },
+                        {
+                            "title": "cDNA"
+                        }
+                    ]
+                },
+                {
+                    "title": "Protein",
+                    "children": [
+                        {
+                            "title": "W"
+                        },
+                        {
+                            "title": "Link"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Annotations",
+            "type": "text",
+            "html": "<p>Annotations</p>",
+            "color": "rgba(50, 50, 255, 0.5)",
+            "children": [
+                {
+                    "title": "Information"
+                },
+                {
+                    "title": "Taxonomy"
+                },
+                {
+                    "title": "References"
+                },
+                {
+                    "title": "Features"
+                }
+            ]
+        },
+        {
+            "title": "Explore",
+            "type": "text",
+            "html": "<p>Explore</p>",
+            "color": "rgba(0, 255, 255, 0.5)",
+            "children": [
+                {
+                    "title": "Alignment"
+                },
+                {
+                    "title": "Statistics"
+                },
+                {
+                    "title": "Prediction"
+                },
+                {
+                    "title": "Comparison"
+                }
+            ]
+        },
+        {
+            "title": "Search",
+            "type": "text",
+            "html": "Molecule",
+            "color": "rgba(255, 0, 255, 0.5)",
+            "children": [
+                {
+                    "title": "By Keywords",
+                    "children": [
+                        {
+                            "title": "Logic Op"
+                        },
+                        {
+                            "title": "Descriptor"
+                        }
+                    ]
+                },
+                {
+                    "title": "By Sequence",
+                    "children": [
+                        {
+                            "title": "BLAST",
+                            "children": [
+                                {
+                                    "title": "BLASTp"
+                                },
+                                {
+                                    "title": "BLASTn"
+                                },
+                                {
+                                    "title": "BLASTx"
+                                },
+                                {
+                                    "title": "tBLASTn"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "Entrez"
+                }
+            ]
+        },
+        {
+            "title": "Database",
+            "type": "text",
+            "html": "Database",
+            "color": "rgba(255, 255, 0, 0.5)",
+            "children": [
+                {
+                    "title": "UniProt"
+                },
+                {
+                    "title": "GenBank"
+                },
+                {
+                    "title": "PDB"
+                },
+                {
+                    "title": "OMIM"
+                }
+            ]
+        }
+    ]
+}
