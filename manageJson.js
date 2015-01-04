@@ -18,7 +18,7 @@ function readFile() {
 
     function parseJson(e) {
         lines = e.target.result;
-        var jsonMindmap = JSON.parse(lines); 
+        var jsonMindmap = JSON.parse(lines);
         createMindmapFromJson(jsonMindmap);
     }
 }
@@ -26,7 +26,8 @@ function readFile() {
 function createMindmapFromJson(mindmap){
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
-    
+
+
     var visualization=false;
     var edition=false;
 
@@ -107,36 +108,6 @@ function createMindmapFromJson(mindmap){
 }
 
 
-//def objet Node
-function Node(title, contents, children, layout, canvas) {
-    this.title = title;
-    this.contents = contents;
-    this.children = children;
-    this.layout = layout;
-    this.vertexLayout = 0; // layout de l'arrete vers le parent
-    //layout texte du noeud
-    var textLayoutNode = canvas.display.text({
-        x: 0,
-        y: 0,
-        origin: { x: "center", y: "center" },
-        align: "center",
-        font: "bold 25px sans-serif",
-        text: title,
-        fill: "#fff"
-    });
-    this.titleLayout = textLayoutNode;
-    //methodes
-    this.addChild = function(son, canvas) {
-        this.children.push(son);
-        //layout de l'arrete
-        son.vertexLayout = canvas.display.line({
-            start: { x: this.layout.x, y: this.layout.y },
-            end: { x: son.layout.x, y: son.layout.y },
-            stroke: "5px #000000",
-        });
-    };
-}
-
 function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, edition){
     var nbSons = childrenData.length;
     var layout = currentNode.layout;
@@ -191,6 +162,8 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
                 child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
             });
         }
+
+        
     }
     //TODO : appel récursif a faire pour tous les fils ici
 }
