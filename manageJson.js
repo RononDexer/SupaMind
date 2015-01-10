@@ -27,7 +27,6 @@ function createMindmapFromJson(mindmap){
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
 
-
     var visualization=false;
     var edition=false;
 
@@ -112,12 +111,19 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
     var nbSons = childrenData.length;
     var layout = currentNode.layout;
     // racine(3)/2  : Math.sqrt(3)/2
-    var tableau6X = [100, -100, 300, -300, 100, -100];
-    var tableau6Y = [(Math.sqrt(3)/2)*200, (Math.sqrt(3)/2)*200, 0, 0, -(Math.sqrt(3)/2)*200, -(Math.sqrt(3)/2)*200];
+    // add
+    var rayon = 200;
+    var pi = Math.PI;
+
 
     for (var i =0; i < nbSons; i++){
+        // Chaque point sur le cercle a pour coordonnées : Mk ( cos(k .2Pi/n) , sin(k .2Pi/n) )
+        var positionX  = layout.x + rayon*Math.cos(i*2*(pi/nbSons))*1.7;
+        var positionY  = layout.y + rayon*Math.sin(i*2*(pi/nbSons));
+
+
         var childTitle = childrenData[i].title;
-        var childLayout = layout.clone({ width: layout.width/1.2,  height: layout.height/1.2 , x: layout.x + tableau6X[i], y: layout.y + tableau6Y[i], fill: "#29b", stroke: "10px #29b" });
+        var childLayout = layout.clone({ width: layout.width/1.2,  height: layout.height/1.2 , x: positionX, y: positionY, fill: "#29b", stroke: "10px #29b" });
         
         var child = new Node(childTitle, [], [], childLayout, canvas);
         currentNode.addChild(child, canvas);
