@@ -114,6 +114,8 @@ function createMindmapFromJson(mindmap){
         });
     }
     
+    
+    
 }
 
 
