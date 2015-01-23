@@ -34,7 +34,7 @@ function createMindmapFromJson(mindmap){
 
 
     var visualization=false;
-    var edition=false;
+    var edition=true;
 
     //Création du canevas oCanvas
     var canvas = oCanvas.create({
@@ -61,8 +61,8 @@ function createMindmapFromJson(mindmap){
     
     if(edition){//pour la racine
         root.layout.bind("mousemove", function () {
-            for(var j =0; j < root.childrens.length; j++){
-                var child = root.childrens[j];
+            for(var j =0; j < root.children.length; j++){
+                var child = root.children[j];
                 child.vertexLayout.start={ x: root.layout.x, y: root.layout.y };
             }
         });
@@ -75,6 +75,7 @@ function createMindmapFromJson(mindmap){
     if(edition){    
         var dragOptions = { changeZindex: true };
         root.layout.dragAndDrop(dragOptions);
+        root.vertexLayout.dragAndDrop(dragOptions);
     }
 
 
@@ -167,8 +168,8 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
         
         if(edition){//pour les fils
             child.layout.bind("mousemove", function () {
-                for(var j =0; j < child.childrens.length; j++){
-                    var grandSon = child.childrens[j];
+                for(var j =0; j < child.children.length; j++){
+                    var grandSon = child.children[j];
                     grandSon.vertexLayout.start={ x: child.layout.x, y: child.layout.y };
                 }
                 child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
