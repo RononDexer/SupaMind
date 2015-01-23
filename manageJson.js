@@ -118,15 +118,18 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
     var layout = currentNode.layout;
     // racine(3)/2  : Math.sqrt(3)/2
     // add
+    var rayon = 200;
     var pi = Math.PI;
+
+
     for (var i =0; i < nbSons; i++){
         // Chaque point sur le cercle a pour coordonnées : Mk ( cos(k .2Pi/n) , sin(k .2Pi/n) )
-        var positionX  =  200*Math.cos(i*2*(pi/nbSons))*1.7;
-        var positionY  =  200*Math.sin(i*2*(pi/nbSons));
+        var positionX  = layout.x + rayon*Math.cos(i*2*(pi/nbSons))*1.7;
+        var positionY  = layout.y + rayon*Math.sin(i*2*(pi/nbSons));
 
 
         var childTitle = childrenData[i].title;
-        var childLayout = layout.clone({ width: layout.width/1.2,  height: layout.height/1.2 , x: layout.x + positionX, y: layout.y + positionY, fill: "#29b", stroke: "10px #29b" });
+        var childLayout = layout.clone({ width: layout.width/1.2,  height: layout.height/1.2 , x: positionX, y: positionY, fill: "#29b", stroke: "10px #29b" });
         
         var child = new Node(childTitle, [], [], childLayout, canvas);
         currentNode.addChild(child, canvas);
