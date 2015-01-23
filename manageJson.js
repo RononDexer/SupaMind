@@ -34,7 +34,7 @@ function createMindmapFromJson(mindmap){
 
 
     var visualization=false;
-    var edition=true;
+    var edition=false;
 
     //Création du canevas oCanvas
     var canvas = oCanvas.create({
@@ -57,7 +57,6 @@ function createMindmapFromJson(mindmap){
 
     var root = new Node(title, [], [], layoutNode, canvas);
     
-    addChildrenAndLayout(root, mindmap.children, canvas, visualization, edition);//TODO: appel en récursif pour tout tracer
     
     if(edition){//pour la racine
         root.layout.bind("mousemove", function () {
@@ -67,6 +66,10 @@ function createMindmapFromJson(mindmap){
             }
         });
     }
+
+    addChildrenAndLayout(root, mindmap.children, canvas, visualization, edition);//TODO: appel en récursif pour tout tracer
+
+
     //affichage arbre
     drawMindmap(root,canvas,edition);
     //affichage noeud racine
@@ -166,15 +169,7 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
             });
         }
         
-        if(edition){//pour les fils
-            child.layout.bind("mousemove", function () {
-                for(var j =0; j < child.children.length; j++){
-                    var grandSon = child.children[j];
-                    grandSon.vertexLayout.start={ x: child.layout.x, y: child.layout.y };
-                }
-                child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
-            });
-        }
+        
 
         
     }
@@ -191,8 +186,18 @@ function drawMindmap(currentNode,canvas,edition) {
         canvas.addChild(child.layout);
         if(edition){
             child.layout.dragAndDrop(dragOptions);
+            child.vertexLayout.dragAndDrop(dragOptions);
         }
         //appel récursif pour s'occuper des sous-fils
         //drawMindmap(child,canvas,edition);
+        if(edition){//pour les fils
+            child.layout.bind("mousemove", function () {
+                for(var j =0; j < child.children.length; j++){
+                    var grandSon = child.children[j];
+                    grandSon.vertexLayout.start={ x: child.layout.x, y: child.layout.y };
+                }
+                child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
+            });
+        }
     }
 }
