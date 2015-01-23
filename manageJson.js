@@ -1,7 +1,7 @@
 function readFile() {
     var input = document.getElementById("jsonUploaded");
     if (!input) {
-      alert("Um, couldn't find the fileinput element.");
+        alert("Um, couldn't find the fileinput element.");
     }
     else if (!input.files) {
       alert("This browser doesn't seem to support the `files` property of file inputs.");
@@ -25,13 +25,13 @@ function readFile() {
 
 function createMindmapFromJson(mindmap){
     var title = mindmap.title;
-    alert("Taille premiere branche " +mindmap.children[0].children.length);
+    /*alert("Taille premiere branche " +mindmap.children[0].children.length);
     for (var i =0; i<mindmap.children[0].children.length; i++){
         alert(mindmap.children[0].children[i].title);
     }
-    
+    */
     alert('Ouverture de ' + title + ' en cours...');
-
+    
 
     var visualization=false;
     var edition=false;
@@ -114,8 +114,6 @@ function createMindmapFromJson(mindmap){
         });
     }
     
-    
-    
 }
 
 
@@ -175,7 +173,13 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
 
         
     }
-    //TODO : appel récursif a faire pour tous les fils ici
+    for(var i=0;i < nbSons;i++){
+		var child=currentNode.children[i];
+		childData=childrenData[i];
+		if ( childData.hasOwnProperty('children') ){
+			addChildrenAndLayout(child, childData.children, canvas, visualization, edition);
+		}
+	}  
 }
 
 function drawMindmap(currentNode,canvas,edition) {
@@ -190,8 +194,7 @@ function drawMindmap(currentNode,canvas,edition) {
             child.layout.dragAndDrop(dragOptions);
             child.vertexLayout.dragAndDrop(dragOptions);
         }
-        //appel récursif pour s'occuper des sous-fils
-        //drawMindmap(child,canvas,edition);
+
         if(edition){//pour les fils
             child.layout.bind("mousemove", function () {
                 for(var j =0; j < child.children.length; j++){
@@ -201,5 +204,6 @@ function drawMindmap(currentNode,canvas,edition) {
                 child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
             });
         }
+        drawMindmap(child,canvas,edition);
     }
 }
