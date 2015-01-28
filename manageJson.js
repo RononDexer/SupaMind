@@ -133,9 +133,10 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
 
     
         // Position pour tester sur le premier rang la position
-
-        //var positionX  = layout.x + rayon*Math.cos(i*((pi+(pi/2))/nbSons))*1.7;
-        //var positionY  = layout.y + rayon*Math.sin(i*((pi+(pi/2))/nbSons));
+        
+        //var positionX  = layout.x - rayon*Math.cos(i*((pi/2)/nbSons)-(pi/4))*1.7;
+        //var positionY  = layout.y - rayon*Math.sin(i*((pi/2)/nbSons)-(pi/4));
+        
 
 
         var childTitle = childrenData[i].title;
@@ -193,17 +194,19 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
         else{ //(layout.y-positionY == 0){
             if(layout.x-positionX < 0){
                 //Format
+                // Affichage seulement sur la droite
                 //alert(childTitle);
-                
-                // afficher seulement sur la droite
-                // Todo
+                positionX  = layout.x + rayon*Math.cos(i*((pi/2)/nbSons)-(pi/4))*1.7;
+                positionY  = layout.y + rayon*Math.sin(i*((pi/2)/nbSons)-(pi/4));
                 
             }
             else{
                 // Explore 
-                // afficher qu'a gauche
+                // Affichage qu'a gauche
                 //alert(childTitle);
-                // Todo
+
+                positionX  = layout.x - rayon*Math.cos(i*((pi/2)/nbSons)-(pi/4))*1.7;
+                positionY  = layout.y - rayon*Math.sin(i*((pi/2)/nbSons)-(pi/4));
             }
         }
 
