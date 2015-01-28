@@ -39,7 +39,7 @@ function createMindmapFromJson(mindmap){
     //Création du canevas oCanvas
     var canvas = oCanvas.create({
         canvas: "#canvas",
-        background: "#FFB266",
+        background: "#FFEFDB",
         fps: 60
     });
 
@@ -131,11 +131,83 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
         var positionX  = layout.x + rayon*Math.cos(i*2*(pi/nbSons))*1.7;
         var positionY  = layout.y + rayon*Math.sin(i*2*(pi/nbSons));
 
+    
+        // Position pour tester sur le premier rang la position
+
+        //var positionX  = layout.x + rayon*Math.cos(i*((pi+(pi/2))/nbSons))*1.7;
+        //var positionY  = layout.y + rayon*Math.sin(i*((pi+(pi/2))/nbSons));
+
 
         var childTitle = childrenData[i].title;
         var childLayout = layout.clone({ width: layout.width/1.2,  height: layout.height/1.2 , x: positionX, y: positionY, fill: "#29b", stroke: "10px #29b" });
         
         var child = new Node(childTitle, [], [], childLayout, canvas);
+
+
+        if (layout.y-positionY < 0){
+            // Molecule, Annotations
+            if(layout.x-positionX < 0){
+                // Molecule
+                // Positionner sur le quart droit inferieur
+            
+                positionX  = layout.x + rayon*Math.cos(i*((pi/2)/nbSons))*1.7;
+                positionY  = layout.y + rayon*Math.sin(i*((pi/2)/nbSons));
+                
+            }
+            else if (layout.x-positionX > 0){
+                // Annotations
+                //alert(childTitle);
+                // Positionner sur le quart droit superieur
+                positionX  = layout.x - rayon*Math.cos(i*((pi/2)/nbSons))*1.7;
+                positionY  = layout.y + rayon*Math.sin(i*((-pi/2)/nbSons));
+            }
+            else{ // layout.x-positionX == 0
+
+                positionX  = layout.x + rayon*Math.cos(i*(pi/nbSons))*1.7;
+                positionY  = layout.y + rayon*Math.sin(i*(pi/nbSons));
+
+            }
+        }
+        else if(layout.y-positionY > 0){
+            // Search, Database
+            if (layout.x-positionX < 0){
+                // Database
+                positionX  = layout.x + rayon*Math.cos(i*((pi/2)/nbSons))*1.7;
+                positionY  = layout.y - rayon*Math.sin(i*((pi/2)/nbSons));
+                //alert(childTitle);
+            }
+            else if(layout.x-positionX > 0){
+                //Search
+                positionX  = layout.x - rayon*Math.cos(i*((pi/2)/nbSons))*1.7;
+                positionY  = layout.y - rayon*Math.sin(i*((pi/2)/nbSons));
+                //alert(childTitle);
+            }
+            else{
+
+                positionX  = layout.x + rayon*Math.cos(i*(pi/nbSons))*1.7;
+                positionY  = layout.y - rayon*Math.sin(i*(pi/nbSons));
+
+            }
+            
+        }
+        else{ //(layout.y-positionY == 0){
+            if(layout.x-positionX < 0){
+                //Format
+                //alert(childTitle);
+                
+                // afficher seulement sur la droite
+                // Todo
+                
+            }
+            else{
+                // Explore 
+                // afficher qu'a gauche
+                //alert(childTitle);
+                // Todo
+            }
+        }
+
+
         currentNode.addChild(child, canvas);
 
 
@@ -172,7 +244,11 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
         
 
         
+
+        
     }
+    
+    /*
     for(var i=0;i < nbSons;i++){
 		var child=currentNode.children[i];
 		childData=childrenData[i];
@@ -180,6 +256,9 @@ function addChildrenAndLayout(currentNode, childrenData, canvas, visualization, 
 			addChildrenAndLayout(child, childData.children, canvas, visualization, edition);
 		}
 	}  
+    */
+    
+    
 }
 
 function drawMindmap(currentNode,canvas,edition) {
