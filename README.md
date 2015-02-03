@@ -1,5 +1,5 @@
-MindMap-Creator
-===============
+SupaMind
+========
 
 Explication de la restructuration du code :
 -------------------------------------------
