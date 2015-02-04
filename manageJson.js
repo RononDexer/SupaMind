@@ -28,10 +28,10 @@ function createMindmapFromJson(mindmap){
     alert('Ouverture de ' + title + ' en cours...');
     
     var visualization=false;
-    var edition=false;
+    var edition=true;
 
     //Création du canevas oCanvas
-    var canvas = oCanvas.create({
+    canvas = oCanvas.create({
         canvas: "#canvas",
         background: "#FFEFDB",
         fps: 60
@@ -41,7 +41,6 @@ function createMindmapFromJson(mindmap){
     var depth=getDepth(mindmap,0,0);
     diminLayout=1.3;//global
     var displaySize=getScale(depth, canvas.width);
-    alert(displaySize);
     var rootWidth=canvas.width/displaySize;
     var layoutNode = canvas.display.rectangle({
         x: canvas.width / 2,
@@ -54,7 +53,7 @@ function createMindmapFromJson(mindmap){
         join: "round",
     });
 
-    var root = new Node(title, [], [], layoutNode, canvas);
+    root = new Node(title, [], [], layoutNode, canvas);
     
     
     if(edition){//pour la racine
@@ -65,53 +64,36 @@ function createMindmapFromJson(mindmap){
             }
         });
     }
-
     addChildrenAndLayout(root, mindmap.children, null,  canvas, visualization, edition);//TODO: appel en récursif pour tout tracer
 
 
     //affichage arbre
-    drawMindmap(root,canvas,edition);
+    drawMindmap(root,root,canvas,edition);
     //affichage noeud racine
     root.layout.addChild(root.titleLayout);//pour afficher texte dans noeud
     canvas.addChild(root.layout);
     if(edition){    
         var dragOptions = { changeZindex: true };
         root.layout.dragAndDrop(dragOptions);
-        root.vertexLayout.dragAndDrop(dragOptions);
     }
+    lastNodeClickedId=0;  
+	if(edition){
+		bindNodesEdition(root,root,canvas,edition);
+	}
+}
 
-
-
-
-    //animation dispo en mode visu
-    if(visualization) {//verifier si le noeud a un texte court sinon afficher tout autre contenu differement
-        var increase = true;
-        node.bind("click tap", function () {
-            if (increase) {
-                increase = false;
-                nodeText.text ="Display informations like :\n-url \n-video...";
-
-                this.stop().animate({
-                    x: canvas.width / 2,
-                    y: canvas.height / 3,
-                    height: 300,
-                    width: 400,
-                    rotation: 0
-                });
-            } else {
-                increase = true;
-
-                nodeText.text = title;
-                this.stop().animate({
-                    x: canvas.width / 2,
-                    y: canvas.width / 3,
-                    height: 40,
-                    width: 200,
-                    rotation: 360
-                });
-            }
-        });
+function getNodeById(currentNode, ident){
+    if(currentNode.ident==ident){
+        return currentNode;
     }
+    for(var i=0; i<currentNode.children.length ; i++){
+        var son = currentNode.children[i];
+        var returnVal=getNodeById(son, ident);
+        if(returnVal){
+            return returnVal;
+        }
+    }
+    return null;
 }
 
 function getDepth(nodeStart,depth,currentDepth){
@@ -272,36 +254,6 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas, visualiza
         
         var child = new Node(childTitle, [], [], childLayout, canvas);
         currentNode.addChild(child, canvas);
-
-        //animation dispo en mode visu
-        if(visualization){//pour les fils
-            child.layout.bind("click tap", function () {
-                if (increase) {
-                    increase = false;
-
-                    //nodeChildText.text = "Informations";
-                    this.stop().animate({
-                        x: node.x + tableau6X[i],
-                        y: node.y + tableau6Y[i],
-                        height: 300,
-                        width: 400,
-                        rotation: 360
-                    });
-                } else {
-                    increase = true;
-
-                    //nodeChildText.text = child1;
-
-                    this.stop().animate({
-                        x: node.x + tableau6X[i],
-                        y: node.y + tableau6Y[i],
-                        height: node.height/1.2,
-                        width: node.width/1.2,
-                        rotation: 0
-                    });
-                }
-            });
-        }    
     }
     if(!root){
         root=currentNode;
@@ -315,12 +267,14 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas, visualiza
 	}  
 }
 
-function drawMindmap(currentNode,canvas,edition) {
-    var nbSons = currentNode.children.length;
+//code function drawMindMap
+
+function drawMindmap(currentNode,root,canvas,edition) {
+	var nbSons = currentNode.children.length;
     var dragOptions = { changeZindex: true };
     for (var i =0; i < nbSons; i++){
         var child = currentNode.children[i];
-        drawMindmap(child,canvas,edition);
+        drawMindmap(child,root,canvas,edition);
         canvas.addChild(child.vertexLayout);
         child.layout.addChild(child.titleLayout);//pour afficher texte dans noeud
         canvas.addChild(child.layout);
@@ -328,15 +282,41 @@ function drawMindmap(currentNode,canvas,edition) {
             child.layout.dragAndDrop(dragOptions);
             child.vertexLayout.dragAndDrop(dragOptions);
         }
-
-        if(edition){//pour les fils
+		if(edition){//pour les fils
             child.layout.bind("mousemove", function () {
-                for(var j =0; j < child.children.length; j++){
-                    var grandSon = child.children[j];
-                    grandSon.vertexLayout.start={ x: child.layout.x, y: child.layout.y };
+				var clickedNode=getNodeById(root,this.ident);
+                for(var j =0; j < clickedNode.children.length; j++){
+                    var son = clickedNode.children[j];
+                    son.vertexLayout.start={ x: this.x, y: this.y };
                 }
-                child.vertexLayout.end={ x: child.layout.x, y: child.layout.y };
+                clickedNode.vertexLayout.end={ x: this.x, y: this.y };
             });
         }
     }
+}
+
+
+function bindNodesEdition(currentNode,root,canvas,edition) {
+    //traitement de currentNode	
+	currentNode.layout.bind("dblclick tap", function () {
+		var clickedNode=getNodeById(root,this.ident);
+		document.getElementById('newTextValue').value = clickedNode.title;//nommage champ a remplir
+		document.getElementById('editBox').click();//lancement overlay
+		lastNodeClickedId=this.ident;
+	});
+    var nbSons = currentNode.children.length;
+    for (var i =0; i < nbSons; i++){
+        //appel recursif sur les fils
+        var child = currentNode.children[i];
+        bindNodesEdition(child,root,canvas,edition);
+	}
+}
+
+function editTextBox(){
+	var newText=document.getElementById('newTextValue').value;
+	var nodeToChange=getNodeById(root,lastNodeClickedId);
+	if(newText!="" && newText!=nodeToChange.title){
+		nodeToChange.setTitle(newText);
+		canvas.redraw();
+	}
 }

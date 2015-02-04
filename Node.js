@@ -2,8 +2,15 @@
 //def objet Node
 function Node(title, contents, children, layout, canvas) {
     this.title = title;
+    //declaration var statique
+    if ( typeof Node.counter == 'undefined' ) {
+        Node.counter = 1;
+    }
+    this.ident=Node.counter;
+    Node.counter+=1;
     this.contents = contents;
     this.children = children;
+    layout.ident=this.ident;//necessaire pour binding
     this.layout = layout;
     this.vertexLayout = 0; // layout de l'arrete vers le parent
     //layout texte du noeud
@@ -32,5 +39,12 @@ function Node(title, contents, children, layout, canvas) {
             end: { x: son.layout.x, y: son.layout.y },
             stroke: size+"px #000000",
         });
+    };
+    this.setTitle = function(title){
+        this.title=title;
+		this.titleLayout.text=title;
+        if (title.length>12){
+            this.titleLayout.text=title.substring(0,10)+".."
+        }
     };
 }

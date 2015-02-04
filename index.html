@@ -28,7 +28,20 @@
 	
     <h2>Step 2 : You can drag elements at your convenience</h2>
     <center>
+	<p><a id="editBox"  class="button" href="#popup1">Edition Noeud</a></p>  <!style="visibility:hidden;">
+	<div id="popup1" class="overlay">
+		<a class="cancel" href="#"></a>
+		<div class="popup">
+			<h2>Nouveau Nom du noeud:</h2>
+			<a class="close" href="#">&times;</a>
+			<div class="content">
+				<input type="text" name="new Text Value" id="newTextValue" value="..."><br>
+				<button onclick="editTextBox()">Edition Noeud</button> 
+			</div>
+		</div>
+	</div>
     <canvas id="canvas" width="1500" height="900"></canvas>
     </center>
+	</form>
 </body>
 </html>
