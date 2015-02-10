@@ -47,4 +47,7 @@ function Node(title, contents, children, layout, canvas) {
             this.titleLayout.text=title.substring(0,10)+".."
         }
     };
+    this.addContent = function(content){
+        this.contents.push(content);
+    };
 }
