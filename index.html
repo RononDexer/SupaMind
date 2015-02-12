@@ -3,7 +3,7 @@
 <head>
     <title>SupaMind</title>
 
-  	<meta name="description" value="MindMap Creator" />
+  	<meta name="description" value="SupaMind" />
   	<meta name="keywords" value="javascript mindmap ocanvas dropzone bioinformatic master bordeaux" />
 
     <script src="ocanvas-2.7.3.min.js"></script>
@@ -21,14 +21,20 @@
 	      </h1>
     </center>
 	<br>
-	<center><h2>SupaMind is a javascript application allowing to create mind maps.</h2></center><br>
+	<center><h2>SupaMind is a javascript application allowing to create mindmaps.</h2></center><br>
 	</center>
-	
-	<h3>Step 1 : Upload your file</h3>
-
-	<input type="file" id="jsonUploaded">
-	<button onclick="editMindmap()">Edit it</button> 
-	<button onclick="visualizeMindMap()">Visualize it</button> 
+	<div  style="margin-left:20px">
+            <h3>Step 1 : Create a new mindmap...</h3>
+            <button onclick="createMindmapFromScratch()">Create it</button> <br>
+            
+            <h3>or Upload your mindmap</h3>
+            <input type="file" id="jsonUploaded">
+            <button onclick="editMindmap()">Edit it</button> 
+            <button onclick="visualizeMindMap()">Visualize it</button> 
+            
+            <h3>or View a demo</h3>
+            <button onclick="viewDemo()">Demo</button> 
+        </div>
     </div>
     <div id="step2Text" style="visibility:hidden;">
     </div>
@@ -37,7 +43,7 @@
     <br>
 	<button id="saveButton" onclick="saveMindMap()" style="visibility:hidden;">Save JSON file</button>
     </center>
-	<p><a id="editBox"  class="button" style="visibility:hidden;" href="#popup1">Edition Noeud</a></p>
+	<p><a id="editBox"  class="button" style="visibility:hidden;" href="#popup1">Launch Node Editor</a></p>
         <div id="popup1" class="overlay">
             <a class="cancel" href="#"></a>
             <div id="popupVis" class="popup">

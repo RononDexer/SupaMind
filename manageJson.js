@@ -48,7 +48,7 @@ function createMindmapFromJson(mindmap){
     }
     divStep2Text.style.visibility="visible";
     //drawing mindmap
-    htmlCanvas=document.getElementById("canvas");
+    var htmlCanvas=document.getElementById("canvas");
     htmlCanvas.style.visibility="visible";
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
@@ -64,6 +64,9 @@ function createMindmapFromJson(mindmap){
     var depth=getDepth(mindmap,0,0);
     diminLayout=1.3;//global
     var displaySize=getScale(depth, canvas.width);
+    if(depth==0){
+        displaySize*=2;
+    }
     var rootWidth=canvas.width/displaySize;
     var layoutNode = canvas.display.rectangle({
         x: canvas.width / 2,
@@ -73,12 +76,13 @@ function createMindmapFromJson(mindmap){
         height: rootWidth/5,
         fill: "#079",
         stroke: "10px #079",
-        join: "round",
+        join: "round"
     });
 
     root = new Node(title, [], [], layoutNode, canvas);
     
-    
+    visualization=true;
+    edition=!visualization;
     if(edition){//pour la racine
         root.layout.bind("mousemove", function () {
             for(var j =0; j < root.children.length; j++){
@@ -87,10 +91,12 @@ function createMindmapFromJson(mindmap){
             }
         });
     }
-    addChildrenAndLayout(root, mindmap.children, null,  canvas);
+    if(mindmap.hasOwnProperty('children')){
+        addChildrenAndLayout(root, mindmap.children);
+    }
     
     if(mindmap.hasOwnProperty('contents')){
-	    addContents(root, mindmap);
+        addContents(root, mindmap);
     }
     //affichage arbre
     drawMindmap(root,root,canvas,edition);
@@ -102,14 +108,42 @@ function createMindmapFromJson(mindmap){
         root.layout.dragAndDrop(dragOptions);
     }
     lastNodeClickedId=0;  
-	if(edition){
-		bindNodesEdition(root);
-	}
+    if(edition){
+        bindNodesEdition(root);            
+    }
     if(visualization){
         bindNodesVisualisation(root);
     }    
+    bindNodesMouseMove(root);
     var saveButton = document.getElementById('saveButton');
     saveButton.style.visibility="visible";
+}
+
+function createMindmapFromScratch(){
+    var newMindMap = {title:"Supa Mindmap"};
+    edition=true;
+    visualization=!edition;
+    createMindmapFromJson(newMindMap);
+}
+
+function viewDemo(){
+    visualization=true;
+    edition=!visualization;
+    var mindmap=loadJSON("test/mindMapWithContents.json",createMindmapFromJson);
+    
+}
+
+function loadJSON(path, success)
+{
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function()
+    {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            success(JSON.parse(xhr.responseText));
+        }
+    };
+    xhr.open("GET", path, true);
+    xhr.send();
 }
 
 function getNodeById(currentNode, ident){
@@ -213,7 +247,7 @@ function externalCollisionExist(calculatedLayout, treeWthLayout, father){
     return 0;
 }
 
-function addChildrenAndLayout(currentNode, childrenData, root, canvas){
+function addChildrenAndLayout(currentNode, childrenData){
     var nbSons = childrenData.length;
     var layout = currentNode.layout;
     var rayon = layout.width;
@@ -224,7 +258,7 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas){
         var positionY  = layout.y + rayon*Math.sin(i*2*(pi/nbSons));
         //si ce n'est pas la racine : reduire le trace des fils
         var calculatedLayout={x:positionX, y:positionY, width:layout.width/diminLayout, height:layout.height/diminLayout};
-        if(root){
+        if(currentNode.ident!=root.ident){
             var rootLayout=root.layout;
             var deltaX=layout.x-rootLayout.x;
             var deltaY=rootLayout.y-layout.y;
@@ -280,21 +314,27 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas){
         
         var childTitle = childrenData[i].title;
         var strokeSize=0.05*layout.width/diminLayout;
-        var childLayout = layout.clone({ width: layout.width/diminLayout,  height: layout.height/diminLayout , x: calculatedLayout.x, y: calculatedLayout.y, fill: "#29b", stroke: strokeSize+"px #29b" });
+        var childLayout = canvas.display.rectangle({ 
+            x: calculatedLayout.x, 
+            y: calculatedLayout.y, 
+            origin: { x: "center", y: "center" },
+            width: layout.width/diminLayout, 
+            height: layout.height/diminLayout, 
+            fill: "#29b", 
+            stroke: strokeSize+"px #29b",
+            join : "round"            
+        });
         
         var child = new Node(childTitle, [], [], childLayout, canvas);
         currentNode.addChild(child, canvas);
     }
-    if(!root){
-        root=currentNode;
-    }
     for(var i=0;i < nbSons;i++){
-		var child=currentNode.children[i];
-		childData=childrenData[i];
-		if ( childData.hasOwnProperty('children') ){
-			addChildrenAndLayout(child, childData.children, root, canvas);
-		}
-	}  
+        var child=currentNode.children[i];
+        childData=childrenData[i];
+        if ( childData.hasOwnProperty('children') ){
+            addChildrenAndLayout(child, childData.children);
+        }
+    }  
 }
 
 //code function drawMindMap
@@ -311,9 +351,9 @@ function drawMindmap(currentNode,root,canvas,edition) {
         if(edition){
             child.layout.dragAndDrop(dragOptions);
         }
-		if(edition){//pour les fils
+        if(edition){//pour les fils
             child.layout.bind("mousemove", function () {
-				var clickedNode=getNodeById(root,this.ident);
+                var clickedNode=getNodeById(root,this.ident);
                 for(var j =0; j < clickedNode.children.length; j++){
                     var son = clickedNode.children[j];
                     son.vertexLayout.start={ x: this.x, y: this.y };
@@ -394,21 +434,186 @@ function bindNodesEdition(currentNode,root) {
         //appel recursif sur les fils
         var child = currentNode.children[i];
         bindNodesEdition(child,root);
+    }
+}
+
+function bindNodesMouseMove(currentNode,root) {
+    if(root==undefined){
+        root=currentNode;
+    }
+    
+    //binding layout avec la souris
+    currentNode.layout.bind("mouseenter", function () {
+        if (visualization){
+            canvas.mouse.cursor("pointer");
+        }
+        if(edition && !this.addButton){
+            var clickedNode=getNodeById(root,this.ident);            
+            this.addButton = addButtonToNode("+",clickedNode,0);
+            if (this.ident!=root.ident){
+                this.delButton = addButtonToNode("-",clickedNode,1);
+            }
+        }
+    })
+    currentNode.layout.bind("mouseleave", function () {
+	canvas.mouse.cursor("default");
+	if(edition){
+	    if(this.addButton){                
+		var layoutCollision = this.addButton.clone({width: this.addButton.width*1.2, height: this.addButton.height*2.5});
+		var keepButton=collisionExist(layoutCollision,canvas.mouse);
+		if(!keepButton){
+		    canvas.removeChild(this.addButton);
+		    this.addButton = undefined;
+                    if(this.delButton){
+                        canvas.removeChild(this.delButton);
+                        this.delButton = undefined;
+                    }
+		}		
+	    }            
 	}
+    });
+    var nbSons = currentNode.children.length;
+    for (var i =0; i < nbSons; i++){
+        //appel recursif sur les fils
+        var child = currentNode.children[i];
+        bindNodesMouseMove(child,root);
+    }
+}
+
+function addButtonToNode(name,clickedNode,position){
+    //caclulate position
+    var calcSize=clickedNode.layout.height/2;
+    var calcX=clickedNode.layout.x+clickedNode.layout.width/2;
+    var calcY=clickedNode.layout.y-clickedNode.layout.height/2;
+    calcX-=calcSize/2;
+    calcY+=calcSize/2.1;
+    if(position==1){
+        calcY=calcY+calcSize+2;
+    }
+    var layoutButton = canvas.display.rectangle({
+        x: calcX,
+        y: calcY,
+        origin: { x: "center", y: "center" },
+        width: calcSize,
+        height: calcSize,
+        fill: "#999",
+        stroke: "1px #000",
+        join: "round"
+    });
+    layoutButton.ident=clickedNode.ident;
+    var textSize=layoutButton.width;
+    var textLayoutButton = canvas.display.text({
+        x: 0,
+        y: 0,
+        origin: { x: "center", y: "center" },
+        align: "center",
+        font: "bold "+textSize+"px sans-serif",
+        text: name,
+        fill: "#fff"
+    });
+    layoutButton.addChild(textLayoutButton);
+    //buttons binding
+    if(name=="+"){
+        layoutButton.bind("click tap", function () {
+            var relatedNode=getNodeById(root,this.ident);
+            addChildToNode(relatedNode);
+        });
+    }
+    else{//name="-"
+        layoutButton.bind("click tap", function () {
+            var relatedNode=getNodeById(root,this.ident);
+            deleteNodeLayout(relatedNode);
+            var father = getFather(relatedNode,root);
+            for(var i =0; i < father.children.length; i++){
+                if(father.children[i].ident==relatedNode.ident){
+                    father.children.splice(i, 1);
+                }
+            }
+        });
+    }
+    layoutButton.bind("mouseenter", function () {
+        canvas.mouse.cursor("pointer");
+    });
+    layoutButton.bind("mouseleave", function () {
+        canvas.mouse.cursor("default");
+    });
+    //display button
+    canvas.addChild(layoutButton);
+    return layoutButton;
+}
+
+function getFather(node,currentNode){
+    for(var i =0; i < currentNode.children.length; i++){
+        if(currentNode.children[i].ident==node.ident){
+            return currentNode;
+        }
+    }
+    for(var i =0; i < currentNode.children.length; i++){
+        var father = getFather(node, currentNode.children[i]);
+        if(father){
+            return father;
+        }
+    }
+}
+
+function addChildToNode(relatedNode){
+    for(var i =0; i < relatedNode.children.length; i++){
+        deleteNodeLayout(relatedNode.children[i]);
+    }
+    var newChildData = {title:"new Node"};
+    var childrenData=relatedNode.children;
+    childrenData.push(newChildData);
+    relatedNode.children=[];
+    //remove link between text and layout
+    relatedNode.layout.removeChild(relatedNode.titleLayout);
+    //recaculate children's layout
+    addChildrenAndLayout(relatedNode, childrenData, root, canvas);
+    drawMindmap(relatedNode,root,canvas,edition);//draw
+    //relink text and layout
+    relatedNode.layout.addChild(relatedNode.titleLayout);
+    //put node above vertex
+    canvas.removeChild(relatedNode.layout);
+    canvas.addChild(relatedNode.layout);
+    //link node edition 
+    for(var i =0; i < relatedNode.children.length; i++){
+        bindNodesEdition(relatedNode.children[i],root); 
+        bindNodesMouseMove(relatedNode.children[i],root); 
+    }
+    canvas.redraw();
+}
+
+function deleteNodeLayout(relatedNode){
+    for(var i =0; i < relatedNode.children.length; i++){
+        deleteNodeLayout(relatedNode.children[i]);
+    }
+    //make sure there are no buttons left on the node
+    if(relatedNode.layout.addButton){
+        canvas.removeChild(relatedNode.layout.addButton);
+        relatedNode.addButton = undefined; 
+    }
+    if(relatedNode.layout.delButton){
+        canvas.removeChild(relatedNode.layout.delButton);
+        relatedNode.delButton = undefined;
+    }
+    //delete layout
+    if(relatedNode.ident!=root.ident){
+        canvas.removeChild(relatedNode.vertexLayout);
+    }
+    canvas.removeChild(relatedNode.layout);
 }
 
 function saveNode(){
-	var nodeToChange=getNodeById(root,lastNodeClickedId);
-	saveNodeName(nodeToChange);
-	saveNodeContent(nodeToChange);
+    var nodeToChange=getNodeById(root,lastNodeClickedId);
+    saveNodeName(nodeToChange);
+    saveNodeContent(nodeToChange);
 }
 
 function saveNodeName(nodeToChange){
-	var newText=document.getElementById('newTextValue').value;
-	if(newText!="" && newText!=nodeToChange.title){
-		nodeToChange.setTitle(newText);
-		canvas.redraw();
-	}
+    var newText=document.getElementById('newTextValue').value;
+    if(newText!="" && newText!=nodeToChange.title){
+            nodeToChange.setTitle(newText);
+            canvas.redraw();
+    }
 }
 
 function saveNodeContent(nodeToChange){
@@ -435,65 +640,65 @@ function isInt(value) {
 }
 
 function saveMindMap(){
-	seen=[];
-	function simplifyAttrib(key, value) {
-	    if( key && !isInt(key) && !( key=="title" || key=="contents" || key=="children" || key=="information" || key=="type") ){
-		return undefined;
-	    }
-	    if (value != null && typeof value == "object"){
-		if (seen.indexOf(value) >= 0)
-		    return
-		seen.push(value);
-	    }
-	    return value;
-	}
-    
-	var jsonToWrite= JSON.stringify(root, simplifyAttrib);
-	saveTextAsFile(jsonToWrite,"mindMapSaved.json");
+    seen=[];
+    function simplifyAttrib(key, value) {
+        if( key && !isInt(key) && !( key=="title" || key=="contents" || key=="children" || key=="information" || key=="type") ){
+            return undefined;
+        }
+        if (value != null && typeof value == "object"){
+            if (seen.indexOf(value) >= 0)
+                return
+            seen.push(value);
+        }
+        return value;
+    }
+
+    var jsonToWrite= JSON.stringify(root, simplifyAttrib);
+    saveTextAsFile(jsonToWrite,"mindMapSaved.json");
 }
 
 
 function saveTextAsFile(textToWrite, nameFile)
 {
-	var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-	var fileNameToSaveAs = nameFile;
+    var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+    var fileNameToSaveAs = nameFile;
 
-	var downloadLink = document.createElement("a");
-	downloadLink.download = fileNameToSaveAs;
-	downloadLink.innerHTML = "Download File";
-	if (window.webkitURL != null)
-	{
-		// Chrome allows the link to be clicked
-		// without actually adding it to the DOM.
-		downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-	}
-	else
-	{
-		// Firefox requires the link to be added to the DOM
-		// before it can be clicked.
-		downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-		downloadLink.onclick = destroyClickedElement;
-		downloadLink.style.display = "none";
-		document.body.appendChild(downloadLink);
-	}
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    if (window.webkitURL != null)
+    {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+    }
+    else
+    {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = destroyClickedElement;
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+    }
 
-	downloadLink.click();
+    downloadLink.click();
 }
 
 function destroyClickedElement(event)
 {
-	document.body.removeChild(event.target);
+    document.body.removeChild(event.target);
 }
 
 function loadFileAsText()
 {
-	var fileToLoad = document.getElementById("fileToLoad").files[0];
+    var fileToLoad = document.getElementById("fileToLoad").files[0];
 
-	var fileReader = new FileReader();
-	fileReader.onload = function(fileLoadedEvent) 
-	{
-		var textFromFileLoaded = fileLoadedEvent.target.result;
-		document.getElementById("inputTextToSave").value = textFromFileLoaded;
-	};
-	fileReader.readAsText(fileToLoad, "UTF-8");
+    var fileReader = new FileReader();
+    fileReader.onload = function(fileLoadedEvent) 
+    {
+            var textFromFileLoaded = fileLoadedEvent.target.result;
+            document.getElementById("inputTextToSave").value = textFromFileLoaded;
+    };
+    fileReader.readAsText(fileToLoad, "UTF-8");
 }
