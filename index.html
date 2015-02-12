@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+﻿<!DOCTYPE html>
+<html>
 <head>
     <title>SupaMind</title>
 
@@ -8,41 +8,62 @@
 
     <script src="ocanvas-2.7.3.min.js"></script>
     <script src="Node.js"></script> 
-    <script src="Content.js"></script> 
+    <script src="Content.js"></script>
     <script src="manageJson.js"></script> 
     <link rel="stylesheet" href="style.css"/>
 </head>
-<body style="background:#E0F8F7">
+<body style="background:#E0F8F7">    
+	<div id="textIntro">
 	<center>
-		<img itemprop="image" src="images/univ-bx.png" alt="logo" />
+		<img itemprop="image" src="images/univ-bx.png" alt="logo" id="img-bx" />
 	      <h1 id="logo" itemprop="name">
 	        <span>SupaMind</span>
 	      </h1>
-	
-	<br><h2>SupaMind is a javascript application allowing to create mind maps.</h2><br>
+    </center>
+	<br>
+	<center><h2>SupaMind is a javascript application allowing to create mind maps.</h2></center><br>
 	</center>
 	
-	<h3>Step 1 : Upload your file or <a href="http://www.freeformatter.com/xml-to-json-converter.html">convert your file into a json file</a> :</h3>
+	<h3>Step 1 : Upload your file</h3>
 
 	<input type="file" id="jsonUploaded">
-	<button onclick="readFile()">Try it</button> 
-	
-    <h2>Step 2 : You can drag elements at your convenience</h2>
+	<button onclick="editMindmap()">Edit it</button> 
+	<button onclick="visualizeMindMap()">Visualize it</button> 
+    </div>
+    <div id="step2Text" style="visibility:hidden;">
+    </div>
     <center>
-	<p><a id="editBox"  class="button" href="#popup1">Edition Noeud</a></p>  <!style="visibility:hidden;">
-	<div id="popup1" class="overlay">
+    <canvas id="canvas" width="1500" height="900" style="visibility:hidden;" ></canvas>
+    <br>
+	<button id="saveButton" onclick="saveMindMap()" style="visibility:hidden;">Save JSON file</button>
+    </center>
+	<p><a id="editBox"  class="button" style="visibility:hidden;" href="#popup1">Edition Noeud</a></p>
+        <div id="popup1" class="overlay">
+            <a class="cancel" href="#"></a>
+            <div id="popupVis" class="popup">
+            <center>
+                <h2>Node Editor</h2>
+            </center>
+                <br>
+                <a class="close" href="#">&times;</a>
+                <div class="content">
+                    <center>Title :<input type="text" name="new Text Value" id="newTextValue" value="..."></center><br>
+                    Contents :
+                    <textarea class="longInput" style="width: 690px;" cols="30" rows="30" id="nodeContent" value="vide"></textarea><br>
+                    <center><br><button onclick="saveNode()">Save changes</button> </center>
+                </div>
+            </div>
+	</div>
+
+	<p><a id="showBox"  class="button" style="visibility:hidden;" href="#popup2">Node visualisation</a></p>
+	<div id="popup2" class="overlay">
 		<a class="cancel" href="#"></a>
 		<div class="popup">
-			<h2>Nouveau Nom du noeud:</h2>
 			<a class="close" href="#">&times;</a>
-			<div class="content">
-				<input type="text" name="new Text Value" id="newTextValue" value="..."><br>
-				<button onclick="editTextBox()">Edition Noeud</button> 
+			<div id="visualization" class="content">
 			</div>
 		</div>
 	</div>
-    <canvas id="canvas" width="1500" height="900"></canvas>
-    </center>
 	</form>
 </body>
 </html>

@@ -1,3 +1,14 @@
+function editMindmap(){
+    edition=true;
+    visualization=!edition;
+    readFile();
+}
+function visualizeMindMap(){
+    visualization=true;
+    edition=!visualization;
+    readFile();
+}
+    
 function readFile() {
     var input = document.getElementById("jsonUploaded");
     if (!input) {
@@ -7,7 +18,7 @@ function readFile() {
       alert("This browser doesn't seem to support the `files` property of file inputs.");
     }
     else if (!input.files[0]) {
-      alert("Please select a file before clicking 'Try it'");
+      alert("Please select a file before clicking 'Edit it' or 'Visualize it'");
     }
     else {
         var file = input.files[0];
@@ -24,11 +35,23 @@ function readFile() {
 }
 
 function createMindmapFromJson(mindmap){
+    //clearing page
+    var divIntroText=document.getElementById("textIntro");
+    divIntroText.parentNode.removeChild(divIntroText);
+    //changing Step2
+    var divStep2Text=document.getElementById("step2Text");
+    if(edition){    
+        divStep2Text.innerHTML+="<center><h3>Step 2 :   You can drag elements at your convenience and double-click to edit a node</h3></center>";
+    }
+    else if(visualization){
+        divStep2Text.innerHTML+="<center><h3>Step 2 : Double-click for visualize a node's content</h3></center>";      
+    }
+    divStep2Text.style.visibility="visible";
+    //drawing mindmap
+    htmlCanvas=document.getElementById("canvas");
+    htmlCanvas.style.visibility="visible";
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
-    
-    var visualization=false;
-    var edition=true;
 
     //Création du canevas oCanvas
     canvas = oCanvas.create({
@@ -64,9 +87,11 @@ function createMindmapFromJson(mindmap){
             }
         });
     }
-    addChildrenAndLayout(root, mindmap.children, null,  canvas, visualization, edition);//TODO: appel en récursif pour tout tracer
-
-
+    addChildrenAndLayout(root, mindmap.children, null,  canvas);
+    
+    if(mindmap.hasOwnProperty('contents')){
+	    addContents(root, mindmap);
+    }
     //affichage arbre
     drawMindmap(root,root,canvas,edition);
     //affichage noeud racine
@@ -78,8 +103,13 @@ function createMindmapFromJson(mindmap){
     }
     lastNodeClickedId=0;  
 	if(edition){
-		bindNodesEdition(root,root,canvas,edition);
+		bindNodesEdition(root);
 	}
+    if(visualization){
+        bindNodesVisualisation(root);
+    }    
+    var saveButton = document.getElementById('saveButton');
+    saveButton.style.visibility="visible";
 }
 
 function getNodeById(currentNode, ident){
@@ -183,7 +213,7 @@ function externalCollisionExist(calculatedLayout, treeWthLayout, father){
     return 0;
 }
 
-function addChildrenAndLayout(currentNode, childrenData, root, canvas, visualization, edition){
+function addChildrenAndLayout(currentNode, childrenData, root, canvas){
     var nbSons = childrenData.length;
     var layout = currentNode.layout;
     var rayon = layout.width;
@@ -262,7 +292,7 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas, visualiza
 		var child=currentNode.children[i];
 		childData=childrenData[i];
 		if ( childData.hasOwnProperty('children') ){
-			addChildrenAndLayout(child, childData.children, root, canvas, visualization, edition);
+			addChildrenAndLayout(child, childData.children, root, canvas);
 		}
 	}  
 }
@@ -270,7 +300,7 @@ function addChildrenAndLayout(currentNode, childrenData, root, canvas, visualiza
 //code function drawMindMap
 
 function drawMindmap(currentNode,root,canvas,edition) {
-	var nbSons = currentNode.children.length;
+    var nbSons = currentNode.children.length;
     var dragOptions = { changeZindex: true };
     for (var i =0; i < nbSons; i++){
         var child = currentNode.children[i];
@@ -280,7 +310,6 @@ function drawMindmap(currentNode,root,canvas,edition) {
         canvas.addChild(child.layout);
         if(edition){
             child.layout.dragAndDrop(dragOptions);
-            child.vertexLayout.dragAndDrop(dragOptions);
         }
 		if(edition){//pour les fils
             child.layout.bind("mousemove", function () {
@@ -295,28 +324,176 @@ function drawMindmap(currentNode,root,canvas,edition) {
     }
 }
 
+function addContents(currentNode, data){
+    for (var i =0; i < data.contents.length; i++){
+        var dataContent = data.contents[i];
+        var currentContent=new Content(dataContent.type,dataContent.information)
+        currentNode.addContent(currentContent);
+    }
+    //recursive call
+    for (var i =0; i < currentNode.children.length; i++){
+	    addContents(currentNode.children[i],data.children[i]);
+    }
+}
 
-function bindNodesEdition(currentNode,root,canvas,edition) {
-    //traitement de currentNode	
-	currentNode.layout.bind("dblclick tap", function () {
-		var clickedNode=getNodeById(root,this.ident);
-		document.getElementById('newTextValue').value = clickedNode.title;//nommage champ a remplir
-		document.getElementById('editBox').click();//lancement overlay
-		lastNodeClickedId=this.ident;
-	});
+function bindNodesVisualisation(currentNode,root) {
+    if(root==undefined){
+        root=currentNode;
+    }
+    //currentNode treatment
+    currentNode.layout.bind("dblclick tap", function () {
+        var clickedNode=getNodeById(root,this.ident);
+        //display node title
+        divVisual =document.getElementById('visualization');
+        divVisual.innerHTML = "<center><h2>"+clickedNode.title+"</h2></center><br>";
+        //display node content
+        divPopup =document.getElementById('popupVis');
+        var popupWidthText=getComputedStyle(divPopup,null).width;
+        var popupWidth= parseInt(popupWidthText.split("px")[0]);
+        for(var i=0;i<clickedNode.contents.length;i++){
+            var currentContent = clickedNode.contents[i];
+            var layout={width:popupWidth*85/100};
+            divVisual.innerHTML+=currentContent.getPackagedInformation(layout)+"<br>";
+            if (currentContent.type=="picture"){
+                divVisual.innerHTML+="<br><br>";
+            }
+        }
+        lastNodeClickedId=this.ident;
+        document.getElementById('showBox').click();//lancement overlay
+    });
     var nbSons = currentNode.children.length;
     for (var i =0; i < nbSons; i++){
         //appel recursif sur les fils
         var child = currentNode.children[i];
-        bindNodesEdition(child,root,canvas,edition);
+        bindNodesVisualisation(child,root);
+    }
+}
+
+function bindNodesEdition(currentNode,root) {
+    if(root==undefined){
+        root=currentNode;
+    }
+    //traitement de currentNode	
+    currentNode.layout.bind("dblclick tap", function () {
+        var clickedNode=getNodeById(root,this.ident);
+        document.getElementById('newTextValue').value = clickedNode.title;//nommage champ a remplir
+        var contentsValue = "";
+        for(var i=0;i<clickedNode.contents.length;i++){
+            var currentContent = clickedNode.contents[i];
+            if (currentContent.type=="picture"){
+                    contentsValue+="img:";
+            }
+            contentsValue+= currentContent.information+"\n";
+        }		 
+        document.getElementById('nodeContent').value = contentsValue;//nommage champ a remplir
+        lastNodeClickedId=this.ident;
+        document.getElementById('editBox').click();//lancement overlay
+    });
+    var nbSons = currentNode.children.length;
+    for (var i =0; i < nbSons; i++){
+        //appel recursif sur les fils
+        var child = currentNode.children[i];
+        bindNodesEdition(child,root);
 	}
 }
 
-function editTextBox(){
-	var newText=document.getElementById('newTextValue').value;
+function saveNode(){
 	var nodeToChange=getNodeById(root,lastNodeClickedId);
+	saveNodeName(nodeToChange);
+	saveNodeContent(nodeToChange);
+}
+
+function saveNodeName(nodeToChange){
+	var newText=document.getElementById('newTextValue').value;
 	if(newText!="" && newText!=nodeToChange.title){
 		nodeToChange.setTitle(newText);
 		canvas.redraw();
 	}
+}
+
+function saveNodeContent(nodeToChange){
+    var newContents = document.getElementById('nodeContent').value;
+    var newContentsText = newContents.split("\n");
+    nodeToChange.contents=[];
+    for (var i=0;i<newContentsText.length;i++){
+        var contentTag = newContentsText[i].split(":")[0].split(" ");
+	    var currentContent;
+        if(contentTag=="img"){
+        	var contentSplit = newContentsText[i].split(":");
+        	var contentInfo=contentSplit.slice(1,contentSplit.length).join(":");
+        	currentContent = new Content("picture",contentInfo);
+        }
+        else{
+        	currentContent = new Content("text",newContentsText[i]);
+        }
+        nodeToChange.addContent(currentContent);
+    }
+}
+
+function isInt(value) {
+    return !isNaN(value) && parseInt(Number(value)) == value && !isNaN(parseInt(value, 10));
+}
+
+function saveMindMap(){
+	seen=[];
+	function simplifyAttrib(key, value) {
+	    if( key && !isInt(key) && !( key=="title" || key=="contents" || key=="children" || key=="information" || key=="type") ){
+		return undefined;
+	    }
+	    if (value != null && typeof value == "object"){
+		if (seen.indexOf(value) >= 0)
+		    return
+		seen.push(value);
+	    }
+	    return value;
+	}
+    
+	var jsonToWrite= JSON.stringify(root, simplifyAttrib);
+	saveTextAsFile(jsonToWrite,"mindMapSaved.json");
+}
+
+
+function saveTextAsFile(textToWrite, nameFile)
+{
+	var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+	var fileNameToSaveAs = nameFile;
+
+	var downloadLink = document.createElement("a");
+	downloadLink.download = fileNameToSaveAs;
+	downloadLink.innerHTML = "Download File";
+	if (window.webkitURL != null)
+	{
+		// Chrome allows the link to be clicked
+		// without actually adding it to the DOM.
+		downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+	}
+	else
+	{
+		// Firefox requires the link to be added to the DOM
+		// before it can be clicked.
+		downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+		downloadLink.onclick = destroyClickedElement;
+		downloadLink.style.display = "none";
+		document.body.appendChild(downloadLink);
+	}
+
+	downloadLink.click();
+}
+
+function destroyClickedElement(event)
+{
+	document.body.removeChild(event.target);
+}
+
+function loadFileAsText()
+{
+	var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent) 
+	{
+		var textFromFileLoaded = fileLoadedEvent.target.result;
+		document.getElementById("inputTextToSave").value = textFromFileLoaded;
+	};
+	fileReader.readAsText(fileToLoad, "UTF-8");
 }

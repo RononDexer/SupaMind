@@ -1,5 +1,3 @@
-
-//def objet Node
 function Content(type, information) {
     this.type = type;
     this.information = information;
