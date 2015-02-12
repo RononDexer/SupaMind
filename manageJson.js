@@ -41,10 +41,10 @@ function createMindmapFromJson(mindmap){
     //changing Step2
     var divStep2Text=document.getElementById("step2Text");
     if(edition){    
-        divStep2Text.innerHTML+="<center><h3>Step 2 :   You can drag elements at your convenience and double-click to edit a node</h3></center>";
+        divStep2Text.innerHTML+="<center><h3 style='margin-top:-15px' >Step 2 :   You can drag elements at your convenience and double-click to edit a node</h3></center>";
     }
     else if(visualization){
-        divStep2Text.innerHTML+="<center><h3>Step 2 : Double-click for visualize a node's content</h3></center>";      
+        divStep2Text.innerHTML+="<center><h3 style='margin-top:-15px' >Step 2 : Double-click for visualize a node's content</h3></center>";      
     }
     divStep2Text.style.visibility="visible";
     //drawing mindmap
@@ -81,8 +81,6 @@ function createMindmapFromJson(mindmap){
 
     root = new Node(title, [], [], layoutNode, canvas);
     
-    visualization=true;
-    edition=!visualization;
     if(edition){//pour la racine
         root.layout.bind("mousemove", function () {
             for(var j =0; j < root.children.length; j++){
@@ -133,11 +131,9 @@ function viewDemo(){
     
 }
 
-function loadJSON(path, success)
-{
+function loadJSON(path, success){
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function()
-    {
+    xhr.onreadystatechange = function(){
         if (xhr.readyState === XMLHttpRequest.DONE) {
             success(JSON.parse(xhr.responseText));
         }
