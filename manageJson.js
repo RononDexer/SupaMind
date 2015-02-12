@@ -10,7 +10,7 @@ function visualizeMindMap(){
 }
     
 function readFile() {
-    var input = document.getElementById("jsonUploaded");
+    var input = document.getElementById("fileUploaded");
     if (!input) {
         alert("Um, couldn't find the fileinput element.");
     }
@@ -23,7 +23,13 @@ function readFile() {
     else {
         var file = input.files[0];
         var fileReader = new FileReader();
-        fileReader.onload = parseJson;
+        var fileExtension = file.name.split('.').pop();
+        if(fileExtension=="mm"){
+            fileReader.onload = parseFreeMind;
+        }
+        else{
+            fileReader.onload = parseJson;
+        }
         fileReader.readAsText(file);
     }
 
@@ -31,6 +37,13 @@ function readFile() {
         lines = e.target.result;
         var jsonMindmap = JSON.parse(lines);
         createMindmapFromJson(jsonMindmap);
+    }
+    
+    function parseFreeMind(e) {
+        lines = e.target.result;
+        var stringJson =xml2json.fromStr(lines);
+        var tree = handleFreeMindAttributes(stringJson.map.node);
+        createMindmapFromJson(tree);
     }
 }
 
@@ -184,11 +197,11 @@ function getDepth(nodeStart,depth,currentDepth){
 }
 
 function getScale(depth, canvasWidth){
-    var displaySize= 4.7;//hierOneDisplaySize 
-    for (var i=0; i < depth-2; i++){
-        displaySize+=displaySize/Math.pow(diminLayout,4);
+    var displaySize= 0;
+    for (var i=0; i <= depth; i++){
+        displaySize+=1/Math.pow(diminLayout,i);
     }
-    return displaySize;
+    return displaySize*2.8;
 }
 
 function collisionExist(layout, point){
@@ -708,4 +721,23 @@ function loadFileAsText()
             document.getElementById("inputTextToSave").value = textFromFileLoaded;
     };
     fileReader.readAsText(fileToLoad, "UTF-8");
+}
+
+function handleFreeMindAttributes(treeFreeMind){
+    if(Array.isArray(treeFreeMind)){//children list
+        for(var i =0; i < treeFreeMind.length; i++){
+            treeFreeMind[i]=handleFreeMindAttributes(treeFreeMind[i]);
+        }
+        return treeFreeMind;
+    }
+    else if(treeFreeMind.hasOwnProperty('node')){//current node
+        var children=handleFreeMindAttributes(treeFreeMind.node);
+        if(!Array.isArray(children)){
+            children=[children];
+        }
+        return {title:treeFreeMind["@attributes"]["TEXT"], children:children};
+    }
+    else{//leaf
+        return {title:treeFreeMind["@attributes"]["TEXT"]};
+    }
 }
