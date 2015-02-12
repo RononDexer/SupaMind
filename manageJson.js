@@ -124,6 +124,15 @@ function createMindmapFromScratch(){
     createMindmapFromJson(newMindMap);
 }
 
+function showHelp(){
+    var textHelp = "Tips:\n"+
+    " + For adding contents, you have to edit the node (double-click on it in Edit mode) and in the content area you put some text and/or link to a picture.\n"+
+    " + Each line of your input is considered as a content.\n"+
+    " + For add a picture to a node, follow the procedure previously described to add a content and put 'img:linkToThisImage' in the content area.\n"+
+    " + The order of your contents in the contents area is important and is taking in account when you reedit or visualize the node."
+    alert(textHelp);
+}
+
 function viewDemo(){
     visualization=true;
     edition=!visualization;
