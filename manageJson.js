@@ -50,6 +50,8 @@ function createMindmapFromJson(mindmap){
     //drawing mindmap
     var htmlCanvas=document.getElementById("canvas");
     htmlCanvas.style.visibility="visible";
+    htmlCanvas.width="1500";
+    htmlCanvas.height="900";
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
 
