@@ -6,19 +6,20 @@
   	<meta name="description" value="SupaMind" />
   	<meta name="keywords" value="javascript mindmap ocanvas dropzone bioinformatic master bordeaux" />
 
-    <script src="lib/ocanvas-2.7.3.min.js"></script>
-    <script src="lib/xml2json.js"></script>
+    <script src="resources/lib/ocanvas-2.7.3.min.js"></script>
+    <script src="resources/lib/xml2json.js"></script>
     <script src="src/Node.js"></script> 
-    <script src="src/Content.js"></script>
-    <script src="src/handleMouse.js"></script> 
-    <script src="src/mindMap.js"></script> 
+    <script src="src/Content.js"></script> 
     <script src="src/readFile.js"></script> 
+    <script src="src/mindMap.js"></script> 
+    <script src="src/handleMouse.js"></script>
+    <script src="src/saveFile.js"></script>
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body style="background:#E0F8F7">    
 	<div id="textIntro">
 	<center>
-		<img itemprop="image" src="images/univ-bx.png" alt="logo" id="img-bx" />
+		<img itemprop="image" src="resources/images/univ-bx.png" alt="logo" id="img-bx" />
 	      <h1 id="logo" itemprop="name">
 	        <span>SupaMind</span>
 	      </h1>
@@ -59,7 +60,7 @@
                 <div class="content">
                     <center>Title :<input type="text" name="new Text Value" id="newTextValue" value="..."></center><br>
                     Contents :
-                    <textarea class="longInput" style="width: 690px;" cols="30" rows="30" id="nodeContent" value="vide"></textarea><br>
+                    <textarea class="longInput" style="width: 690px;" cols="30" rows="20" id="nodeContent" value="vide"></textarea><br>
                     <center><br><button onclick="showHelp()">Help</button> <button onclick="saveNode()">Save changes</button></center>
                 </div>
             </div>

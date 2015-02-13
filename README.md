@@ -3,6 +3,8 @@ SupaMind
 
 SupaMind allows you to create a mindmap with contents which can be a set of pictures or text for each node. You can save a mindmap as PNG (by right clicking on it) or as a JSON file which you can reuse on Supamind site to visualize it or edit it again. 
 
+Supamind is available online at : http://ronon.dexer.free.fr/SupaMind/
+
 Tips
 ----
 - In order to add contents, you have to edit the node (double-click on it in Edit mode) and in the content area you put some text and/or link to a picture. Each line of your input is considered as a content.

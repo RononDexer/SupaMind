@@ -1,102 +1,8 @@
-function getNodeById(currentNode, ident){
-    if(currentNode.ident==ident){
-        return currentNode;
-    }
-    for(var i=0; i<currentNode.children.length ; i++){
-        var son = currentNode.children[i];
-        var returnVal=getNodeById(son, ident);
-        if(returnVal){
-            return returnVal;
-        }
-    }
-    return null;
-}
-
-function getDepth(nodeStart,depth,currentDepth){
-    if(!(nodeStart.hasOwnProperty('children')) || nodeStart.children.length==0 ){
-        if(currentDepth>depth){
-            depth = currentDepth;
-        }
-        return depth
-    }    
-    for (var i=0; i < nodeStart.children.length; i++){
-        currentNode=nodeStart.children[i];
-        currentDepth+=1; // we go down in the tree
-		depth = getDepth(currentNode,depth, currentDepth);
-		currentDepth-=1; //we go up in the tree
-    }
-    return depth;
-}
-
-function getScale(depth, canvasWidth){
-    var displaySize= 0;
-    for (var i=0; i <= depth; i++){
-        displaySize+=1/Math.pow(diminLayout,i);
-    }
-    return displaySize*2.8;
-}
-
-function collisionExist(layout, point){
-    if(point.x<layout.x+(layout.width/2) && point.x>layout.x-(layout.width/2)){
-        if(point.y<layout.y+(layout.height/2) && point.y>layout.y-(layout.height/2)){
-            return true;
-        }
-    }
-    return false;
-}
-
-function collisionExistBetweenLayouts(layout1, layout2){
-    //check if each of the 4 coins of the rectangle layout1 is in layout2
-    //first corner : top right and then clockwise
-    for(var i=0; i<4; i++){
-        var point={x:0, y:0};
-        if(i==0 || i==1){
-            point.x=layout1.x+layout1.width/2;
-        }
-        if(i==2 || i==3){
-            point.x=layout1.x-layout1.width/2;
-        }
-        if(i==0 || i==3){
-            point.y=layout1.y+layout1.height/2;
-        }        
-        if(i==1 || i==2){
-            point.y=layout1.y-layout1.height/2;
-        }
-        returnVal= collisionExist(layout2, point);
-        if (returnVal){
-            return true;
-        }
-    }
-    return false;
-}
-
-/*
-*father is the father of the caculatedNode
-*return 0 if no collision
-*return 1 if collision is strong in x
-*return 2 if collision is strong in y
-*/
-function externalCollisionExist(calculatedLayout, treeWthLayout, father){
-    var nbSons=treeWthLayout.children.length;
-    for(var i =0; i < nbSons; i++){
-        var child=treeWthLayout.children[i];
-        var colExist=collisionExistBetweenLayouts(calculatedLayout,child.layout);
-        if(colExist){
-            var deltaX=Math.abs(calculatedLayout.x-child.x);
-            var deltaY=Math.abs(calculatedLayout.y-child.y);
-            if (deltaX>deltaY){
-                return 1;
-            }
-            return 2;
-        }   
-        if(!Object.is(child,father)){//tester Object.is(treeWthLayout,father) pour détecter aussi les collisions internes
-            var returnVal=externalCollisionExist(calculatedLayout, child, father);
-            if (returnVal==1 || returnVal==2){
-                return returnVal;
-            }
-        }
-    }
-    return 0;
+function createMindmapFromScratch(){
+    var newMindMap = {title:"Supa Mindmap"};
+    edition=true;
+    visualization=!edition;
+    createMindmapFromFile(newMindMap);
 }
 
 function addChildrenAndLayout(currentNode, childrenData){
@@ -229,19 +135,6 @@ function addContents(currentNode, data){
 }
 
 
-function getFather(node,currentNode){
-    for(var i =0; i < currentNode.children.length; i++){
-        if(currentNode.children[i].ident==node.ident){
-            return currentNode;
-        }
-    }
-    for(var i =0; i < currentNode.children.length; i++){
-        var father = getFather(node, currentNode.children[i]);
-        if(father){
-            return father;
-        }
-    }
-}
 
 function addChildToNode(relatedNode){
     for(var i =0; i < relatedNode.children.length; i++){
@@ -289,122 +182,122 @@ function deleteNodeLayout(relatedNode){
     canvas.removeChild(relatedNode.layout);
 }
 
-function saveNode(){
-    var nodeToChange=getNodeById(root,lastNodeClickedId);
-    saveNodeName(nodeToChange);
-    saveNodeContent(nodeToChange);
-}
-
-function saveNodeName(nodeToChange){
-    var newText=document.getElementById('newTextValue').value;
-    if(newText!="" && newText!=nodeToChange.title){
-            nodeToChange.setTitle(newText);
-            canvas.redraw();
+//to get the adequate scale : see the whole mindmap in the canvas
+function getScale(depth, canvasWidth){
+    var displaySize= 0;
+    for (var i=0; i <= depth; i++){
+        displaySize+=1/Math.pow(diminLayout,i);
     }
+    return displaySize*2.8;
 }
 
-function saveNodeContent(nodeToChange){
-    var newContents = document.getElementById('nodeContent').value;
-    var newContentsText = newContents.split("\n");
-    nodeToChange.contents=[];
-    for (var i=0;i<newContentsText.length;i++){
-        var contentTag = newContentsText[i].split(":")[0].split(" ");
-	    var currentContent;
-        if(contentTag=="img"){
-        	var contentSplit = newContentsText[i].split(":");
-        	var contentInfo=contentSplit.slice(1,contentSplit.length).join(":");
-        	currentContent = new Content("picture",contentInfo);
+
+//handles collision
+function collisionExist(layout, point){
+    if(point.x<layout.x+(layout.width/2) && point.x>layout.x-(layout.width/2)){
+        if(point.y<layout.y+(layout.height/2) && point.y>layout.y-(layout.height/2)){
+            return true;
         }
-        else{
-        	currentContent = new Content("text",newContentsText[i]);
+    }
+    return false;
+}
+
+function collisionExistBetweenLayouts(layout1, layout2){
+    //check if each of the 4 coins of the rectangle layout1 is in layout2
+    //first corner : top right and then clockwise
+    for(var i=0; i<4; i++){
+        var point={x:0, y:0};
+        if(i==0 || i==1){
+            point.x=layout1.x+layout1.width/2;
         }
-        nodeToChange.addContent(currentContent);
-    }
-}
-
-function isInt(value) {
-    return !isNaN(value) && parseInt(Number(value)) == value && !isNaN(parseInt(value, 10));
-}
-
-function saveMindMap(){
-    seen=[];
-    function simplifyAttrib(key, value) {
-        if( key && !isInt(key) && !( key=="title" || key=="contents" || key=="children" || key=="information" || key=="type") ){
-            return undefined;
+        if(i==2 || i==3){
+            point.x=layout1.x-layout1.width/2;
         }
-        if (value != null && typeof value == "object"){
-            if (seen.indexOf(value) >= 0)
-                return
-            seen.push(value);
+        if(i==0 || i==3){
+            point.y=layout1.y+layout1.height/2;
+        }        
+        if(i==1 || i==2){
+            point.y=layout1.y-layout1.height/2;
         }
-        return value;
-    }
-
-    var jsonToWrite= JSON.stringify(root, simplifyAttrib);
-    saveTextAsFile(jsonToWrite,"mindMapSaved.json");
-}
-
-
-function saveTextAsFile(textToWrite, nameFile)
-{
-    var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-    var fileNameToSaveAs = nameFile;
-
-    var downloadLink = document.createElement("a");
-    downloadLink.download = fileNameToSaveAs;
-    downloadLink.innerHTML = "Download File";
-    if (window.webkitURL != null)
-    {
-            // Chrome allows the link to be clicked
-            // without actually adding it to the DOM.
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-    }
-    else
-    {
-            // Firefox requires the link to be added to the DOM
-            // before it can be clicked.
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-            downloadLink.onclick = destroyClickedElement;
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-    }
-
-    downloadLink.click();
-}
-
-function destroyClickedElement(event)
-{
-    document.body.removeChild(event.target);
-}
-
-function loadFileAsText()
-{
-    var fileToLoad = document.getElementById("fileToLoad").files[0];
-
-    var fileReader = new FileReader();
-    fileReader.onload = function(fileLoadedEvent) 
-    {
-            var textFromFileLoaded = fileLoadedEvent.target.result;
-            document.getElementById("inputTextToSave").value = textFromFileLoaded;
-    };
-    fileReader.readAsText(fileToLoad, "UTF-8");
-}
-
-function handleFreeMindAttributes(treeFreeMind){
-    if(Array.isArray(treeFreeMind)){//children list
-        for(var i =0; i < treeFreeMind.length; i++){
-            treeFreeMind[i]=handleFreeMindAttributes(treeFreeMind[i]);
+        returnVal= collisionExist(layout2, point);
+        if (returnVal){
+            return true;
         }
-        return treeFreeMind;
     }
-    else if(treeFreeMind.hasOwnProperty('node')){//current node
-        var children=handleFreeMindAttributes(treeFreeMind.node);
-        if(!Array.isArray(children)){
-            children=[children];
+    return false;
+}
+
+/*
+*father is the father of the caculatedNode
+*return 0 if no collision
+*return 1 if collision is strong in x
+*return 2 if collision is strong in y
+*/
+function externalCollisionExist(calculatedLayout, treeWthLayout, father){
+    var nbSons=treeWthLayout.children.length;
+    for(var i =0; i < nbSons; i++){
+        var child=treeWthLayout.children[i];
+        var colExist=collisionExistBetweenLayouts(calculatedLayout,child.layout);
+        if(colExist){
+            var deltaX=Math.abs(calculatedLayout.x-child.x);
+            var deltaY=Math.abs(calculatedLayout.y-child.y);
+            if (deltaX>deltaY){
+                return 1;
+            }
+            return 2;
+        }   
+        if(!Object.is(child,father)){//tester Object.is(treeWthLayout,father) pour détecter aussi les collisions internes
+            var returnVal=externalCollisionExist(calculatedLayout, child, father);
+            if (returnVal==1 || returnVal==2){
+                return returnVal;
+            }
         }
-        return {title:treeFreeMind["@attributes"]["TEXT"], children:children};
     }
-    else{//leaf
-        return {title:treeFreeMind["@attributes"]["TEXT"]};
+    return 0;
+}
+
+
+function getNodeById(currentNode, ident){
+    if(currentNode.ident==ident){
+        return currentNode;
+    }
+    for(var i=0; i<currentNode.children.length ; i++){
+        var son = currentNode.children[i];
+        var returnVal=getNodeById(son, ident);
+        if(returnVal){
+            return returnVal;
+        }
+    }
+    return null;
+}
+
+
+function getDepth(nodeStart,depth,currentDepth){
+    if(!(nodeStart.hasOwnProperty('children')) || nodeStart.children.length==0 ){
+        if(currentDepth>depth){
+            depth = currentDepth;
+        }
+        return depth
+    }    
+    for (var i=0; i < nodeStart.children.length; i++){
+        currentNode=nodeStart.children[i];
+        currentDepth+=1; // we go down in the tree
+		depth = getDepth(currentNode,depth, currentDepth);
+		currentDepth-=1; //we go up in the tree
+    }
+    return depth;
+}
+
+function getFather(node,currentNode){
+    for(var i =0; i < currentNode.children.length; i++){
+        if(currentNode.children[i].ident==node.ident){
+            return currentNode;
+        }
+    }
+    for(var i =0; i < currentNode.children.length; i++){
+        var father = getFather(node, currentNode.children[i]);
+        if(father){
+            return father;
+        }
     }
 }

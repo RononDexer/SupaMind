@@ -36,18 +36,18 @@ function readFile() {
     function parseJson(e) {
         lines = e.target.result;
         var jsonMindmap = JSON.parse(lines);
-        createMindmapFromJson(jsonMindmap);
+        createMindmapFromFile(jsonMindmap);
     }
     
     function parseFreeMind(e) {
         lines = e.target.result;
         var stringJson =xml2json.fromStr(lines);
         var tree = handleFreeMindAttributes(stringJson.map.node);
-        createMindmapFromJson(tree);
+        createMindmapFromFile(tree);
     }
 }
 
-function createMindmapFromJson(mindmap){
+function createMindmapFromFile(mindmap){
     //clearing page
     var divIntroText=document.getElementById("textIntro");
     divIntroText.parentNode.removeChild(divIntroText);
@@ -132,26 +132,10 @@ function createMindmapFromJson(mindmap){
     saveButton.style.visibility="visible";
 }
 
-function createMindmapFromScratch(){
-    var newMindMap = {title:"Supa Mindmap"};
-    edition=true;
-    visualization=!edition;
-    createMindmapFromJson(newMindMap);
-}
-
-function showHelp(){
-    var textHelp = "Tips:\n"+
-    " + In order to add contents, you have to edit the node (double-click on it in Edit mode) and in the content area you put some text and/or link to a picture.\n"+
-    " + Each line of your input is considered as a content.\n"+
-    " + In order to add a picture to a node, follow the procedure previously described to add a content and put 'img:linkToThisImage' in the content area.\n"+
-    " + The order of your contents in the contents area is important and is taking in account when you reedit or visualize the node."
-    alert(textHelp);
-}
-
 function viewDemo(){
     visualization=true;
     edition=!visualization;
-    var mindmap=loadJSON("test/mindMapWithContents.json",createMindmapFromJson);
+    var mindmap=loadJSON("test/mindMapWithContents.json",createMindmapFromFile);
     
 }
 
@@ -164,4 +148,24 @@ function loadJSON(path, success){
     };
     xhr.open("GET", path, true);
     xhr.send();
+}
+
+
+function handleFreeMindAttributes(treeFreeMind){
+    if(Array.isArray(treeFreeMind)){//children list
+        for(var i =0; i < treeFreeMind.length; i++){
+            treeFreeMind[i]=handleFreeMindAttributes(treeFreeMind[i]);
+        }
+        return treeFreeMind;
+    }
+    else if(treeFreeMind.hasOwnProperty('node')){//current node
+        var children=handleFreeMindAttributes(treeFreeMind.node);
+        if(!Array.isArray(children)){
+            children=[children];
+        }
+        return {title:treeFreeMind["@attributes"]["TEXT"], children:children};
+    }
+    else{//leaf
+        return {title:treeFreeMind["@attributes"]["TEXT"]};
+    }
 }
