@@ -55,6 +55,7 @@ function addChildrenAndLayout(currentNode, childrenData){
                 beginPoint=0.125;
             }
             else if(deltaX<0-rootLayout.height && deltaY<0-rootLayout.height){//positionning on the lower left quadrant
+                beginPoint=0.25;
             }
             else if( deltaX<0-rootLayout.height && (deltaY<0+rootLayout.height && deltaY>0-rootLayout.height) ){//positionning on the left quadrant
                 beginPoint=0.375;
@@ -267,7 +268,7 @@ function externalCollisionExist(calculatedLayout, treeWthLayout, father){
             }
             return 2;
         }   
-        if(!Object.is(child,father)){//tester Object.is(treeWthLayout,father) to detect the internals collisions
+        if(child.ident!=father.ident){//tester Object.is(treeWthLayout,father) to detect the internals collisions
             var returnVal=externalCollisionExist(calculatedLayout, child, father);
             if (returnVal==1 || returnVal==2){
                 return returnVal;
