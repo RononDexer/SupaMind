@@ -104,7 +104,7 @@ function createMindmapFromFile(mindmap){
     diminLayout=1.3;//global
     var displaySize=getScale(depth, canvas.width);
     if(depth==0){
-        displaySize*=2;
+        displaySize*=3;
     }
     var rootWidth=canvas.width/displaySize;
     var layoutNode = canvas.display.rectangle({
