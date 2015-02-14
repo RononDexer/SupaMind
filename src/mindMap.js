@@ -1,3 +1,26 @@
+/*
+ *  SupaMind in JavaScript, html5, css3
+ *
+ *  This file is part of SupaMind
+ *
+ * This program is free software: you can redistribute it and/or modify it 
+ * under the terms of the GNU General Public License as published by 
+ * the Free Software Foundation, either version 3 of the License, or 
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ * GNU General Public License for more details.
+ *
+ *
+ * Authors:
+ * Florin Buga
+ * Amir Naar
+ * Cedric Sclosser
+ * Vivien Sommard
+ */
+
 function createMindmapFromScratch(){
     var newMindMap = {title:"Supa Mindmap"};
     edition=true;
@@ -11,42 +34,41 @@ function addChildrenAndLayout(currentNode, childrenData){
     var rayon = layout.width;
     var pi = Math.PI;
     for (var i =0; i < nbSons; i++){
-        // Chaque point sur le cercle a pour coordonnées : Mk ( cos(k .2Pi/n) , sin(k .2Pi/n) )
+        // Each points Mk on the circle have as coordinates : Mk (cos(k .2Pi/n) , sin(k .2Pi/n))
         var positionX  = layout.x + rayon*Math.cos(i*2*(pi/nbSons))*1.9;
         var positionY  = layout.y + rayon*Math.sin(i*2*(pi/nbSons));
-        //si ce n'est pas la racine : reduire le trace des fils
+        //If it is not the root : reduce the son
         var calculatedLayout={x:positionX, y:positionY, width:layout.width/diminLayout, height:layout.height/diminLayout};
         if(currentNode.ident!=root.ident){
             var rootLayout=root.layout;
             var deltaX=layout.x-rootLayout.x;
             var deltaY=rootLayout.y-layout.y;
             var beginPoint=0;
-            var nbPtsForAllCircle=(nbSons-1)*4//si on considere 1/4 de cercle
+            var nbPtsForAllCircle=(nbSons-1)*4//if 1/4 of circle is considered
             if (nbSons==1){
                  nbPtsForAllCircle=4;
             }
-            if(deltaX>0+rootLayout.height && deltaY<0-rootLayout.height){//positionner sur le quart droit inferieur
+            if(deltaX>0+rootLayout.height && deltaY<0-rootLayout.height){//positionning on the lower right quadrant
                 beginPoint=0;
             }
-            else if((deltaX<0+rootLayout.height && deltaX>0-rootLayout.height) && deltaY<0-rootLayout.height){//positionner sur le quart en bas
+            else if((deltaX<0+rootLayout.height && deltaX>0-rootLayout.height) && deltaY<0-rootLayout.height){//positionning on the lower quadrant
                 beginPoint=0.125;
             }
-            else if(deltaX<0-rootLayout.height && deltaY<0-rootLayout.height){//positionner sur le quart gauche inferieur
-                beginPoint=0.25;
+            else if(deltaX<0-rootLayout.height && deltaY<0-rootLayout.height){//positionning on the lower left quadrant
             }
-            else if( deltaX<0-rootLayout.height && (deltaY<0+rootLayout.height && deltaY>0-rootLayout.height) ){//positionner sur le quart a gauche
+            else if( deltaX<0-rootLayout.height && (deltaY<0+rootLayout.height && deltaY>0-rootLayout.height) ){//positionning on the left quadrant
                 beginPoint=0.375;
             }
-            else if(deltaX<0-rootLayout.height  && deltaY>0+rootLayout.height){//positionner sur le quart gauche superieur
+            else if(deltaX<0-rootLayout.height  && deltaY>0+rootLayout.height){//positionning on the upper left quadrant
                 beginPoint=0.5;
             }
-            else if( (deltaX<0+rootLayout.height && deltaX>0-rootLayout.height) && deltaY>0+rootLayout.height){//positionner sur le quart en haut
+            else if( (deltaX<0+rootLayout.height && deltaX>0-rootLayout.height) && deltaY>0+rootLayout.height){//positionning on the upper quadrant
                 beginPoint=0.625;
             }
-            else if(deltaX>0+rootLayout.height && deltaY>0+rootLayout.height){//positionner sur le quart droit superieur
+            else if(deltaX>0+rootLayout.height && deltaY>0+rootLayout.height){//positionning on the upper right quadrant
                 beginPoint=0.75;
             }
-            else if(deltaX>0+rootLayout.height && (deltaY<0+rootLayout.height && deltaY>0-rootLayout.height)){//positionner sur le quart a droite
+            else if(deltaX>0+rootLayout.height && (deltaY<0+rootLayout.height && deltaY>0-rootLayout.height)){//positionning on the right quadrant
                 beginPoint=0.875;
             }
             beginPoint*=nbPtsForAllCircle;
@@ -58,7 +80,7 @@ function addChildrenAndLayout(currentNode, childrenData){
             calculatedLayout.y = layout.y + rayon*Math.sin((beginPoint+i)*2*pi/nbPtsForAllCircle);
             var colExist=externalCollisionExist(calculatedLayout, root, currentNode);
             var calls=1;
-	        while (colExist!=0 && calls<4){//il faut rapprocher le noeud
+	        while (colExist!=0 && calls<4){//in order to bring near the nodes 
 	            if(colExist==1){
     	            calculatedLayout.x = layout.x+(calculatedLayout.x-layout.x)*0.8;
 	            }
@@ -95,7 +117,6 @@ function addChildrenAndLayout(currentNode, childrenData){
     }  
 }
 
-//code function drawMindMap
 
 function drawMindmap(currentNode,root,canvas,edition) {
     var nbSons = currentNode.children.length;
@@ -104,12 +125,12 @@ function drawMindmap(currentNode,root,canvas,edition) {
         var child = currentNode.children[i];
         drawMindmap(child,root,canvas,edition);
         canvas.addChild(child.vertexLayout);
-        child.layout.addChild(child.titleLayout);//pour afficher texte dans noeud
+        child.layout.addChild(child.titleLayout);//to display the text on the node 
         canvas.addChild(child.layout);
         if(edition){
             child.layout.dragAndDrop(dragOptions);
         }
-        if(edition){//pour les fils
+        if(edition){//for the sons
             child.layout.bind("mousemove", function () {
                 var clickedNode=getNodeById(root,this.ident);
                 for(var j =0; j < clickedNode.children.length; j++){
@@ -246,7 +267,7 @@ function externalCollisionExist(calculatedLayout, treeWthLayout, father){
             }
             return 2;
         }   
-        if(!Object.is(child,father)){//tester Object.is(treeWthLayout,father) pour détecter aussi les collisions internes
+        if(!Object.is(child,father)){//tester Object.is(treeWthLayout,father) to detect the internals collisions
             var returnVal=externalCollisionExist(calculatedLayout, child, father);
             if (returnVal==1 || returnVal==2){
                 return returnVal;

@@ -1,3 +1,27 @@
+/*
+ *  SupaMind in JavaScript, html5, css3
+ *
+ *  This file is part of SupaMind
+ *
+ * This program is free software: you can redistribute it and/or modify it 
+ * under the terms of the GNU General Public License as published by 
+ * the Free Software Foundation, either version 3 of the License, or 
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ * GNU General Public License for more details.
+ *
+ *
+ * Authors:
+ * Florin Buga
+ * Amir Naar
+ * Cedric Sclosser
+ * Vivien Sommard
+ */
+
+
 function editMindmap(){
     edition=true;
     visualization=!edition;
@@ -68,7 +92,7 @@ function createMindmapFromFile(mindmap){
     var title = mindmap.title;
     alert('Ouverture de ' + title + ' en cours...');
 
-    //Création du canevas oCanvas
+    //Creation of the canvas oCanvas
     canvas = oCanvas.create({
         canvas: "#canvas",
         background: "#FFEFDB",
@@ -96,7 +120,7 @@ function createMindmapFromFile(mindmap){
 
     root = new Node(title, [], [], layoutNode, canvas);
     
-    if(edition){//pour la racine
+    if(edition){//for the root
         root.layout.bind("mousemove", function () {
             for(var j =0; j < root.children.length; j++){
                 var child = root.children[j];
@@ -111,10 +135,10 @@ function createMindmapFromFile(mindmap){
     if(mindmap.hasOwnProperty('contents')){
         addContents(root, mindmap);
     }
-    //affichage arbre
+    //display the tree 
     drawMindmap(root,root,canvas,edition);
-    //affichage noeud racine
-    root.layout.addChild(root.titleLayout);//pour afficher texte dans noeud
+    // dispaly the root node 
+    root.layout.addChild(root.titleLayout);//display text into the node
     canvas.addChild(root.layout);
     if(edition){    
         var dragOptions = { changeZindex: true };
