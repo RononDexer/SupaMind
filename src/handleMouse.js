@@ -59,7 +59,7 @@ function bindNodesEdition(currentNode,root) {
     if(root==undefined){
         root=currentNode;
     }
-    //traitement de currentNode	
+    //treatment of the currentNode	
     currentNode.layout.bind("dblclick tap", function () {
         var clickedNode=getNodeById(root,this.ident);
         document.getElementById('newTextValue').value = clickedNode.title;//nommage champ a remplir
